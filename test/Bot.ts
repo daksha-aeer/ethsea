@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import { Telegraf } from 'telegraf';
-import { InlineKeyboardButton, InlineKeyboardMarkup } from 'telegraf/typings/core/types/typegram';
+import { InlineKeyboardMarkup } from 'telegraf/typings/core/types/typegram';
 
 dotenv.config();
 const token = process.env.TOKEN;
@@ -13,14 +13,14 @@ bot.start((ctx) => {
 });
 
 bot.command('connect_wallet', (ctx) => {
-    const ngrokUrl = 'https://d72d-2405-201-15-71c2-a8a8-bc19-8a6d-b71a.ngrok-free.app'; // ngrok URL
+    const ngrokUrl = 'https://your-ngrok-url.ngrok-free.app'; // ngrok URL
     const chatId = ctx.chat?.id; // Get chat ID
 
     // Construct the inline keyboard
     const inlineKeyboard: InlineKeyboardMarkup = {
         inline_keyboard: [
             [
-                { text: 'Connect Wallet', url: `${ngrokUrl}?chatId=${chatId}` } as InlineKeyboardButton
+                { text: 'Connect Wallet', web_app: { url: `${ngrokUrl}?chatId=${chatId}` } }
             ]
         ]
     };

@@ -4,10 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connect Martian Wallet</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .popup {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .popup h2 {
+            margin: 0 0 10px 0;
+        }
+        .popup button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <h1>Connect Your Martian Wallet</h1>
-    <button id="connectWallet">Connect Wallet</button>
+    <div class="popup">
+        <h2>Connect Your Martian Wallet</h2>
+        <button id="connectWallet">Connect Wallet</button>
+    </div>
     <script src="main.js"></script>
 </body>
 </html>
