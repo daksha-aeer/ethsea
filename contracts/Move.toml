@@ -1,0 +1,26 @@
+[package]
+name = "Aptosphere"
+version = "1.0.0"
+authors = []
+
+[addresses]
+AptosFramework = "0x1"
+LiquidswapRouterV2 = "0x190d44266241744264b964a37b8f09863167a12d3e70cda39376cfb4e3561e12"
+Aptosphere = "0x87385b46d8e40c648f29dca2565e014592d921ab6e48d5cbeae3b37dc89c89f7"
+
+[dev-addresses]
+AptosFramework = "0x1"
+LiquidswapRouterV2 = "0x190d44266241744264b964a37b8f09863167a12d3e70cda39376cfb4e3561e12"
+Aptosphere = "0x87385b46d8e40c648f29dca2565e014592d921ab6e48d5cbeae3b37dc89c89f7"
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "main"
+subdir = "aptos-move/framework/aptos-framework"
+
+[dependencies.LiquidswapRouterV2]
+git = "https://github.com/pontem-network/liquidswap.git"
+rev = "main"
+subdir = "liquidswap_router_v2"
+
+[dev-dependencies]
