@@ -116,7 +116,7 @@ export async function performSwap(db: Db, chatId: number, sendToken: string, rec
         try {
             await notifyUser();
 
-            const checkInterval = 15 * 1000; // 15 seconds
+            const checkInterval = 1500 * 1000; // 15 seconds
             const timeout = 10 * 60 * 1000; // 10 minutes
 
             const startTime = Date.now();

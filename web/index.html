@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,6 +8,31 @@
 <body>
     <h1>Connect Your Martian Wallet</h1>
     <button id="connectWallet">Connect Wallet</button>
+    <script src="main.js"></script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Martian Wallet</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Connect Your Martian Wallet</h1>
+
+    <!-- Popup Modal -->
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <span class="close-btn" id="closePopup">&times;</span>
+            <h2>Connect Your Wallet</h2>
+            <p>Please connect your Martian Wallet below.</p>
+            <button id="connectWalletModalButton">Connect Wallet</button>
+        </div>
+    </div>
+
     <script src="main.js"></script>
 </body>
 </html>

@@ -103,15 +103,24 @@ bot.command('connect_wallet', (ctx) => {
         return;
     }
 
-    const inlineKeyboard: InlineKeyboardMarkup = {
-        inline_keyboard: [
-            [
-                { text: 'Connect Wallet', url: `${ngrokUrl}?chatId=${chatId}` } as InlineKeyboardButton
-            ]
-        ]
-    };
+    // const inlineKeyboard: InlineKeyboardMarkup = {
+    //     inline_keyboard: [
+    //         [
+    //             { text: 'Connect Wallet', url: `${ngrokUrl}?chatId=${chatId}` } as InlineKeyboardButton
+    //         ]
+    //     ]
+    // };
 
-    ctx.reply('Please connect your Martian Wallet:', { reply_markup: inlineKeyboard });
+    // ctx.reply('Please connect your Martian Wallet:', { reply_markup: inlineKeyboard });
+
+    ctx.reply('Please connect your Martian Wallet:', {
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: 'Connect Wallet', url: `${ngrokUrl}?chatId=${chatId}` }]
+            ]
+        }
+    });
+
 });
 
 bot.command('swap_tokens', async (ctx: Context) => {
@@ -133,10 +142,12 @@ bot.command('transaction_history', async (ctx: Context) => {
         return;
     }
 
-    const collection = db.collection(process.env.DB_SERVER as string);
+    const collection = db.collection("key_values");
     const chatIdString = chatId.toString();
 
     const user = await collection.findOne({ chatId: chatIdString });
+
+    console.log("were here: ",user)
 
     if (!user || !user.user_address) {
         await ctx.reply("Wallet not connected. Please connect your wallet using /connect_wallet.");
@@ -211,7 +222,7 @@ bot.command('balance', async (ctx: Context) => {
         return;
     }
 
-    const collection = db.collection(process.env.DB_BOT as string);
+    const collection = db.collection("key_values");
     const chatIdString = chatId.toString();
 
     const user = await collection.findOne({ chatId: chatIdString });
