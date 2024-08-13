@@ -8,7 +8,7 @@ document.getElementById('connectWallet').addEventListener('click', async () => {
     try {
         // Request connection
         await window.martian.connect();
-        const { address } = await window.martian.account();
+        const { address: userAddress } = await window.martian.account();
 
         // Extract chatId from URL query parameters
         const urlParams = new URLSearchParams(window.location.search);
@@ -20,7 +20,7 @@ document.getElementById('connectWallet').addEventListener('click', async () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ address, chatId })
+            body: JSON.stringify({ userAddress, chatId })
         });
 
         if (response.ok) {

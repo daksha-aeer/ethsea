@@ -19,3 +19,5 @@ ignition/deployments/chain-31337
 test/*
 !test/Bot.ts
 !test/excRate.ts
+!test/swapHandler.ts
+

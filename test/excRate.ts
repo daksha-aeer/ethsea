@@ -2,6 +2,9 @@ import { convertValueToDecimal, SDK } from '@pontem/liquidswap-sdk';
 import { AptosAccount, HexString } from "aptos";
 import { Db } from 'mongodb';
 import { Decimal } from 'decimal.js';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const TOKEN_ADDRESSES: { [key: string]: string } = {
     'APT': '0x1::aptos_coin::AptosCoin',
@@ -16,29 +19,38 @@ export async function getSwapRate(db: Db, chatId: number, sendToken: string, rec
     const chatIdStr = chatId.toString();
     const user = await userCollection.findOne({ chatId: chatIdStr });
 
-    function convertDecimalToValue(decimalValue: number, decimals: number): number {
-        return decimalValue / Math.pow(10, decimals);
+    function convertDecimalToValue(decimalValue: Decimal, decimals: number): number {
+        return decimalValue.div(Math.pow(10, decimals)).toNumber();
     }
-
-    let sendDec: number;
-    let recDec: number;
 
     if (!user || !user.privateKey) {
         console.log('Error: Private key not found.');
         return null;
     }
-    if (sendToken == 'APT') {
-        sendDec = 8
+    const sendDec = sendToken.toUpperCase() === 'APT' ? 8 : 6;
+    const recDec = receiveToken.toUpperCase() === 'APT' ? 8 : 6;
+
+    //0.000009 APT
+    //0.00005 usd
+    let firstGas: number
+    let secondGas: number
+
+    // firstGas = sendDec === 8? convertValueToDecimal(0.000009, 8) : convertValueToDecimal(0.00005, 6);
+    // secondGas = recDec === 8? convertValueToDecimal(0.000009, 8) : convertValueToDecimal(0.00005, 6);
+
+    if (sendDec == 8){
+        firstGas = 900000
     }
-    else {
-        sendDec = 6
+    else{
+        firstGas = 50
     }
-    if (receiveToken == 'APT') {
-        recDec = 8
+    if (recDec == 8){
+        secondGas = 900000
     }
-    else {
-        recDec = 6
+    else{
+        secondGas = 50
     }
+
 
     const sdk = new SDK({
         nodeUrl: 'https://fullnode.mainnet.aptoslabs.com/v1',
@@ -56,6 +68,8 @@ export async function getSwapRate(db: Db, chatId: number, sendToken: string, rec
         }
     });
 
+    const client = sdk.client;
+
     const fromTokenAddress = TOKEN_ADDRESSES[sendToken.toUpperCase()] || '';
     const toTokenAddress = TOKEN_ADDRESSES[receiveToken.toUpperCase()] || '';
 
@@ -64,18 +78,60 @@ export async function getSwapRate(db: Db, chatId: number, sendToken: string, rec
         return null;
     }
 
+    const privateKeyHex = process.env.PRIVATE_KEY;
+    if (!privateKeyHex) {
+        throw new Error("PRIVATE_KEY is not defined in the environment variables.");
+    }
+    const privateKeyBytes = HexString.ensure(privateKeyHex).toUint8Array();
+    const account = new AptosAccount(privateKeyBytes);
+
     try {
+
+        const registerPayload = {
+            type: 'entry_function_payload',
+            function: '0x1::managed_coin::register',
+            type_arguments: [toTokenAddress],
+            arguments: []
+        };
+
+        const registerTxn = await client.generateTransaction(account.address(), registerPayload);
+        const signedRegisterTxn = await client.signTransaction(account, registerTxn);
+        const registerTxnResult = await client.submitTransaction(signedRegisterTxn);
+        await client.waitForTransaction(registerTxnResult.hash);
+        console.log(`CoinStore registered successfully: ${registerTxnResult.hash}`);
+
+        const valToDec = convertValueToDecimal(swapAmt, sendDec)
+        let calcSend = valToDec.minus(firstGas);
+        console.log("first gas: ", calcSend)
+
         // Get exchange rate
         const output = await sdk.Swap.calculateRates({
             fromToken: fromTokenAddress,
             toToken: toTokenAddress,
-            amount: convertValueToDecimal(swapAmt, sendDec),
+            amount: calcSend,
             curveType: 'uncorrelated',
             interactiveToken: 'from',
             version: 0
         });
 
-        return convertDecimalToValue(new Decimal(output).toNumber(), recDec);
+        // const gasOutput = new Decimal(output).minus(new Decimal(secondGas));
+        const gasOutput = new Decimal(output)
+        console.log("second gas: ", gasOutput.toString()); // Use toString for proper logging
+
+        // Convert gasOutput back to a number if needed
+        let aprRate = convertDecimalToValue(gasOutput, recDec);
+        console.log("Rate: ", aprRate);
+        return aprRate;
+
+        // const firstOutput = convertDecimalToValue(new Decimal(output), recDec);
+
+        // // Convert `secondGas` to number for arithmetic operation
+        // const secondGasNumber = convertDecimalToValue(secondGas, recDec);
+
+        // // Perform the subtraction
+        // const calcOutput = firstOutput - secondGasNumber;
+
+        // return calcOutput
     } catch (e) {
         console.log('Error during rate calculation:', e);
         return null;

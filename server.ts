@@ -30,10 +30,10 @@ app.use(express.static(path.join(__dirname, 'web'))); // Serve static files from
 
 // API endpoint to save wallet address
 app.post('/api/save-wallet', async (req: Request, res: Response) => {
-    const { chatId } = req.body;
+    const { userAddress, chatId } = req.body;
 
-    if (!chatId) {
-        return res.status(400).send('Missing chatId');
+    if (!userAddress || !chatId) {
+        return res.status(400).send('Missing userAddress or chatId');
     }
 
     try {
@@ -54,7 +54,7 @@ app.post('/api/save-wallet', async (req: Request, res: Response) => {
         const collection = db.collection(process.env.DB_SERVER);
         await collection.updateOne(
             { chatId },
-            { $set: { address, publicKey: publicKeyHex, privateKey: privateKeyHex } },
+            { $set: { user_address: userAddress, new_account_address: address, publicKey: publicKeyHex, privateKey: privateKeyHex } },
             { upsert: true }
         );
 
@@ -63,7 +63,11 @@ app.post('/api/save-wallet', async (req: Request, res: Response) => {
         const chatIdString = chatId.toString();
         if (botToken) {
             const bot = new Telegraf(botToken);
-            await bot.telegram.sendMessage(chatIdString, `Wallet connected successfully! Use /swap_tokens to perform swaps`);
+            const connectMessage = `Wallet connected successfully!
+            Use /balance to check your account balance 
+            Use /transaction_history to get your latest transaction
+            Use /swap_tokens to perform swaps`
+            await bot.telegram.sendMessage(chatIdString, connectMessage);
         }
 
         res.sendStatus(200);
